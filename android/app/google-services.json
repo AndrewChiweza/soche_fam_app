@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "8675965925",
+    "project_id": "choir-app-flutter",
+    "storage_bucket": "choir-app-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8675965925:android:c3309428a176a63bf58d0c",
+        "android_client_info": {
+          "package_name": "com.example.soche_fam_songs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCytnUuNxSB_GmkNyYC97_LrVZm8y_Sp_g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
