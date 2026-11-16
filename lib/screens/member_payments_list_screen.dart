@@ -11,7 +11,7 @@ class MemberPaymentsListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Required Contributions"),
+        title: const Text("Pay Contributions"),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

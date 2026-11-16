@@ -51,7 +51,7 @@ class NotificationDetailsScreen extends StatelessWidget {
           icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Notification"),
+        title: const Text("Announcement"),
         actions: [
           IconButton(
             icon: const Icon(CupertinoIcons.delete, color: Colors.red),
@@ -68,9 +68,9 @@ class NotificationDetailsScreen extends StatelessWidget {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Color(0xFF00674F),
                   content: Text(
-                    "Notification deleted successfully",
+                    "Announcement deleted successfully",
                     style: TextStyle(color: Colors.white),
                   ),
                   behavior: SnackBarBehavior.floating,

@@ -14,7 +14,7 @@ dependencies:
   flutter_local_notifications: ^17.2.2
   http: ^1.2.2
   
-  # 🔥 FIREBASE (ALIGNED & Stable)
+  # 🔥 FIREBASE (ALIGNED & Stable
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.0
   cloud_firestore: ^5.4.0

@@ -85,7 +85,7 @@ class NotificationsScreen extends StatelessWidget {
             ),
             title: Row(
               children: [
-                const Text("Notifications"),
+                const Text("Announcements"),
                 const SizedBox(width: 8),
                 if (allNotifications.isNotEmpty)
                   CircleAvatar(

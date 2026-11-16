@@ -30,7 +30,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   bool _awaitingPin = false;
   String _detectedOperator = "Enter Number";
   String _providerCode = "";
-  String? _operatorLogoPath; // ✅ Holds the brand PNG asset path
+  String? _operatorLogoPath;
   bool _isGuest = true;
 
   StreamSubscription<DocumentSnapshot>? _txSubscription;
@@ -64,7 +64,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       setState(() {
         _detectedOperator = "TNM Mpamba";
         _providerCode = "tnm";
-        _operatorLogoPath = "images/tnm_mpamba.png"; // ✅ TNM Mpamba PNG
+        _operatorLogoPath = "images/tnm_mpamba.png";
       });
     } else if (cleanNum.startsWith('09') ||
         cleanNum.startsWith('+2659') ||
@@ -72,7 +72,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       setState(() {
         _detectedOperator = "Airtel Money";
         _providerCode = "airtel";
-        _operatorLogoPath = "images/airtel_money.png"; // ✅ Airtel Money PNG
+        _operatorLogoPath = "images/airtel_money.png";
       });
     } else {
       setState(() {
@@ -83,7 +83,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
     }
   }
 
-  /// Listens to Firestore in real time for the Render backend / PayChangu Webhook update
+  /// Listens to Firestore in real time on the same page for PayChangu confirmation
   void _listenForWebhookConfirmation(
       String txRef, String payerName, String phone) {
     setState(() => _awaitingPin = true);
@@ -99,7 +99,10 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       if (data['status'] == 'success') {
         _txSubscription?.cancel();
         if (!mounted) return;
-        setState(() => _awaitingPin = false);
+        setState(() {
+          _awaitingPin = false;
+          _isProcessing = false;
+        });
         _showNativeFeedbackSheet(
           isSuccess: true,
           reference: txRef,
@@ -110,7 +113,10 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       } else if (data['status'] == 'failed') {
         _txSubscription?.cancel();
         if (!mounted) return;
-        setState(() => _awaitingPin = false);
+        setState(() {
+          _awaitingPin = false;
+          _isProcessing = false;
+        });
         _showNativeFeedbackSheet(
           isSuccess: false,
           reference: txRef,
@@ -147,8 +153,8 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isSuccess
-                    ? Colors.green.withOpacity(0.12)
-                    : Colors.red.withOpacity(0.12),
+                    ? Colors.green.withValues(alpha: 0.12)
+                    : Colors.red.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -167,7 +173,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
             const SizedBox(height: 12),
             Text(
               isSuccess
-                  ? "Your contribution of $amountText for '${widget.payment.title}' has been recorded in the choir ledger."
+                  ? "Your contribution of $amountText for '${widget.payment.title}' has been recorded, May God bless you!."
                   : "The transaction was cancelled or declined by your mobile money provider.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
@@ -243,70 +249,25 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
     final finalPayerName = _nameCtrl.text.trim().isEmpty
         ? "Guest Contributor"
         : _nameCtrl.text.trim();
+    final bool isBusy = _isProcessing || _awaitingPin;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Checkout")),
-      body: _awaitingPin
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(28.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_operatorLogoPath != null) ...[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          _operatorLogoPath!,
-                          height: 54,
-                          width: 54,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    const CircularProgressIndicator(color: Color(0xFF00674F)),
-                    const SizedBox(height: 24),
-                    const Text(
-                      "Check Your Phone Screen",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "A $_detectedOperator PIN prompt has been sent to ${_phoneCtrl.text.trim()}. Enter your PIN to complete the MWK ${widget.payment.amount.toStringAsFixed(0)} payment.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 15,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    TextButton(
-                      onPressed: () {
-                        _txSubscription?.cancel();
-                        setState(() => _awaitingPin = false);
-                      },
-                      child: const Text(
-                        "Cancel Waiting",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            )
-          : SingleChildScrollView(
+      appBar: AppBar(title: const Text("Mobile Checkout")),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-// Contribution Details Card
+                    // Contribution Details Card
                     Card(
-                      color: Theme.of(context).primaryColor.withOpacity(0.08),
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -336,7 +297,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text(
-                                  "Amount Due:",
+                                  "Amount:",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
@@ -358,7 +319,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      "Contribution Infor",
+                      "Contribution Info.",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -367,12 +328,12 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                     TextFormField(
                       controller: _nameCtrl,
                       keyboardType: TextInputType.name,
-                      enabled: _isGuest,
+                      enabled: _isGuest && !isBusy,
                       decoration: InputDecoration(
                         labelText: "Your Full Name",
                         prefixIcon: const Icon(Icons.person_outline),
                         helperText: _isGuest
-                            ? "Required for Treasury"
+                            ? "Required for Treasurer"
                             : "Loaded from profile",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -390,8 +351,9 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                     TextFormField(
                       controller: _phoneCtrl,
                       keyboardType: TextInputType.phone,
+                      enabled: !isBusy,
                       decoration: InputDecoration(
-                        labelText: "Number (08XXX / 09XXX)",
+                        labelText: "Phone (08XX/09XX)",
                         prefixIcon: const Icon(Icons.phone_android),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -423,7 +385,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                           return "Please enter your phone number";
                         }
                         if (_providerCode.isEmpty) {
-                          return "Enter a valid Airtel/TNM Number";
+                          return "Enter a valid Airtel (09XX) or TNM (08XX) number";
                         }
                         if (v.trim().length < 10) {
                           return "Enter a complete 10-digit Malawian number";
@@ -431,71 +393,155 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 30),
-// Pay Now Button
-                    _isProcessing
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF00674F),
-                            ),
-                          )
-                        : SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00674F),
-                                foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 28),
+// Seamless In-Page Linear Loading Bar or Pay Button
+                    if (isBusy) ...[
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFF00674F).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                const Color(0xFF00674F).withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Payment processing...",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: Color(0xFF00674F),
+                                  ),
                                 ),
-                              ),
-                              onPressed: () async {
-                                if (!_formKey.currentState!.validate()) return;
-                                setState(() => _isProcessing = true);
-                                final uniqueRef =
-                                    "soche-${DateTime.now().millisecondsSinceEpoch}";
-                                final res =
-                                    await PayChanguService.initiateDirectCharge(
-                                  amount: widget.payment.amount,
-                                  rawPhoneNumber: _phoneCtrl.text.trim(),
-                                  provider: _providerCode,
-                                  memberName: finalPayerName,
-                                  email: widget.currentMemberEmail,
-                                  txRef: uniqueRef,
-                                  paymentDueId: widget.payment.id,
-                                );
-                                if (!mounted) return;
-                                setState(() => _isProcessing = false);
-                                if (res['success'] == true) {
-                                  _listenForWebhookConfirmation(
-                                    uniqueRef,
-                                    finalPayerName,
-                                    _phoneCtrl.text.trim(),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(res['message']),
-                                      backgroundColor: Colors.red.shade700,
+                                if (_awaitingPin)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _txSubscription?.cancel();
+                                      setState(() {
+                                        _awaitingPin = false;
+                                        _isProcessing = false;
+                                      });
+                                    },
+                                    child: const Text(
+                                      "Cancel",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  );
-                                }
-                              },
-                              child: const Text(
-                                "Pay Now",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: const LinearProgressIndicator(
+                                minHeight: 6,
+                                color: Color(0xFF00674F),
+                                backgroundColor: Color(0xFFD0E3DF),
                               ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _awaitingPin
+                                  ? "Enter your $_detectedOperator PIN to complete payment."
+                                  : "Connecting to $_detectedOperator...",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00674F),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
+                          onPressed: () async {
+                            if (!_formKey.currentState!.validate()) return;
+                            setState(() => _isProcessing = true);
+                            final uniqueRef =
+                                "soche-${DateTime.now().millisecondsSinceEpoch}";
+                            final res =
+                                await PayChanguService.initiateDirectCharge(
+                              amount: widget.payment.amount,
+                              rawPhoneNumber: _phoneCtrl.text.trim(),
+                              provider: _providerCode,
+                              memberName: finalPayerName,
+                              email: widget.currentMemberEmail,
+                              txRef: uniqueRef,
+                              paymentDueId: widget.payment.id,
+                            );
+                            if (!mounted) return;
+                            if (res['success'] == true) {
+                              setState(() => _isProcessing = false);
+                              _listenForWebhookConfirmation(
+                                uniqueRef,
+                                finalPayerName,
+                                _phoneCtrl.text.trim(),
+                              );
+                            } else {
+                              setState(() => _isProcessing = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(res['message']),
+                                  backgroundColor: Colors.red.shade700,
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text(
+                            "Pay Now",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
+          ),
+// Pinned Security Badge Footer at the Bottom
+          // Pinned PayChangu Security Banner Image at the Bottom
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'images/secured_by_paychangu.png',
+                  width: double.infinity,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

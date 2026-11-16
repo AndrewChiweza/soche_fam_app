@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -6,7 +7,6 @@ import 'package:http/http.dart' as http;
 import '../main.dart';
 import '../screens/member_payments_list_screen.dart';
 import '../screens/notifications_screen.dart';
-import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -18,8 +18,8 @@ class PushNotificationProvider with ChangeNotifier {
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  // Fixed to point to your live Render Node.js backend API
-  static const String _backendUrl = "https://soche-fam-backend.onrender.com";
+  static const String _backendUrl =
+      "https://soche-fam-backend.onrender.com/api";
 
   final List<RemoteMessage> _messages = [];
   List<RemoteMessage> get messages => _messages;
@@ -60,9 +60,7 @@ class PushNotificationProvider with ChangeNotifier {
         sound: true,
       );
 
-      if (!kIsWeb) {
-        await _fcm.subscribeToTopic('all_members');
-      }
+      // Declared outside the if-block so onMessage can reference it safely
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
         'soche_fam_alerts',
         'Soche Fam Announcements & Alerts',
@@ -71,22 +69,26 @@ class PushNotificationProvider with ChangeNotifier {
         importance: Importance.max,
       );
 
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
+      if (!kIsWeb) {
+        await _fcm.subscribeToTopic('all_members');
 
-      const AndroidInitializationSettings androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+        await _localNotifications
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(channel);
 
-      // 1. Handle taps on foreground local notification banners
-      await _localNotifications.initialize(
-        const InitializationSettings(android: androidSettings),
-        onDidReceiveNotificationResponse: (NotificationResponse response) {
-          final payloadType = response.payload ?? 'announcement';
-          _handleNotificationNavigation({'type': payloadType});
-        },
-      );
+        const AndroidInitializationSettings androidSettings =
+            AndroidInitializationSettings('@mipmap/ic_launcher');
+
+        // 1. Handle taps on foreground local notification banners
+        await _localNotifications.initialize(
+          const InitializationSettings(android: androidSettings),
+          onDidReceiveNotificationResponse: (NotificationResponse response) {
+            final payloadType = response.payload ?? 'announcement';
+            _handleNotificationNavigation({'type': payloadType});
+          },
+        );
+      }
 
       // 2. Handle taps when app is in the background (minimized)
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -107,7 +109,7 @@ class PushNotificationProvider with ChangeNotifier {
         notifyListeners();
 
         final notification = message.notification;
-        if (notification != null) {
+        if (notification != null && !kIsWeb) {
           _localNotifications.show(
             notification.hashCode,
             notification.title,

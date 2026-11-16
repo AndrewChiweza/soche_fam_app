@@ -7,7 +7,8 @@ import 'package:soche_fam/providers/favorites_provider.dart';
 import 'package:soche_fam/providers/notifications_provider.dart';
 import 'package:soche_fam/providers/songs_provider.dart';
 
-import 'package:soche_fam/screens/admin/admin_sign_in_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:soche_fam/screens/member_payments_list_screen.dart';
 import 'package:soche_fam/screens/registration_form_screen.dart';
 import 'package:soche_fam/theme/app_theme.dart';
@@ -73,13 +74,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     FlexibleSpaceBar(
                       titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
                       title: GestureDetector(
-                        onLongPress: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AdminSignInScreen(),
-                            ),
-                          );
+                        onLongPress: () async {
+                          final Uri adminWebUrl =
+                              Uri.parse('https://onrender.com');
+                          if (await canLaunchUrl(adminWebUrl)) {
+                            await launchUrl(
+                              adminWebUrl,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Could not open the Admin Web Portal.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         },
                         child: const Text(
                           "SOCHE FAM",
@@ -197,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Icon(Icons.person_add_outlined),
                         SizedBox(width: 8),
-                        Text("Be a Member"),
+                        Text("Registration"),
                       ],
                     ),
                   ),
@@ -207,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Icon(CupertinoIcons.creditcard, size: 22),
                         SizedBox(width: 8),
-                        Text("Payments & Dues"),
+                        Text("Pay Contribution"),
                       ],
                     ),
                   ),
