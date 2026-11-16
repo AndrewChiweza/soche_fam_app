@@ -26,7 +26,7 @@ dependencies:
   hive_flutter: ^1.1.0
   # 🎨 UI & UTILS
   google_fonts: ^6.1.0
-  font_awesome_flutter: ^10.7.0
+  font_awesome_flutter: ^11.0.0
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.1
   share_plus: ^10.0.2
