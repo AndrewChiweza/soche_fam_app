@@ -121,7 +121,7 @@ class InfoScreen extends StatelessWidget {
                     children: [
                       _infoTile(
                         context: context,
-                        icon: FontAwesomeIcons.github,
+                        icon: Icons.code_outlined,
                         title: "View source code",
                         onTap: () =>
                             _launch("https://github.com/AndrewChiweza"),
@@ -129,7 +129,7 @@ class InfoScreen extends StatelessWidget {
                       _divider(),
                       _infoTile(
                         context: context,
-                        icon: FontAwesomeIcons.facebook,
+                        icon: Icons.facebook,
                         iconColor: Colors.blue,
                         title: "Facebook Developer",
                         onTap: () =>
@@ -138,7 +138,7 @@ class InfoScreen extends StatelessWidget {
                       _divider(),
                       _infoTile(
                         context: context,
-                        icon: FontAwesomeIcons.shareNodes,
+                        icon: Icons.share,
                         title: "Share this app...",
                         onTap: shareApp,
                       ),
