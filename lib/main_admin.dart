@@ -17,9 +17,7 @@ import 'screens/admin/admin_panel_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await Hive.initFlutter();
   await Hive.openBox("AppPrefs");
@@ -52,18 +50,6 @@ class SocheFamAdminWebApp extends StatelessWidget {
               '/admin-sign-in': (_) => const AdminSignInScreen(),
               '/admin-panel': (_) => const AdminPanelScreen(),
             },
-           builder: (context, child) {
-  return Container(
-    color: const Color(0xFFF3F6F5),
-    child: Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1320),
-        child: child ?? const SizedBox.shrink(),
-      ),
-    ),
-  );
-},
-
             home: const _AdminWebStartupGate(),
           );
         },

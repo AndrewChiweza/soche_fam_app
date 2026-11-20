@@ -463,12 +463,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Flex(
-                direction: isDesktop ? Axis.horizontal : Axis.vertical,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: isDesktop
-                    ? CrossAxisAlignment.center
-                    : CrossAxisAlignment.start,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16,
+                runSpacing: 16,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,9 +558,14 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 if (txSnap.hasData) {
                   txCount = txSnap.data!.docs.length;
                   for (var doc in txSnap.data!.docs) {
-                    totalRevenue += (doc['amountPaid'] as num).toDouble();
+                    final data = doc.data() as Map<String, dynamic>?;
+                    final amt = data?['amountPaid'];
+                    if (amt is num) {
+                      totalRevenue += amt.toDouble();
+                    }
                   }
                 }
+
                 return StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection('members')
