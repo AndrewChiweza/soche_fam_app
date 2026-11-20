@@ -17,7 +17,7 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
 
     defaultConfig {
         applicationId = "com.example.soche_fam_songs"
-        minSdk = 21
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -52,17 +52,18 @@ class SocheFamAdminWebApp extends StatelessWidget {
               '/admin-sign-in': (_) => const AdminSignInScreen(),
               '/admin-panel': (_) => const AdminPanelScreen(),
             },
-            builder: (context, child) {
-              return Container(
-                color: const Color(0xFFF0F4F3),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 960),
-                    child: child ?? const SizedBox.shrink(),
-                  ),
-                ),
-              );
-            },
+           builder: (context, child) {
+  return Container(
+    color: const Color(0xFFF3F6F5),
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1320),
+        child: child ?? const SizedBox.shrink(),
+      ),
+    ),
+  );
+},
+
             home: const _AdminWebStartupGate(),
           );
         },
